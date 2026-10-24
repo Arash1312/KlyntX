@@ -1,0 +1,143 @@
+KLYNT
+A tiny, dependency-free task queue for JavaScript.
+
+Project Structure
+.
+├── package.json
+├── README.md
+├── LICENSE
+└── src
+    └── index.js
+
+==================================================
+package.json
+==================================================
+
+{
+  "name": "klynt",
+  "version": "1.0.0",
+  "description": "A tiny dependency-free task queue with clean async control.",
+  "type": "module",
+  "main": "src/index.js",
+  "keywords": [
+    "queue",
+    "async",
+    "tasks",
+    "javascript",
+    "minimal"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/index.js"
+  }
+}
+
+==================================================
+README.md
+==================================================
+
+# Klynt
+
+Klynt is a tiny, dependency-free task queue built for developers who prefer
+clean APIs over heavy frameworks.
+
+## Features
+
+- Zero dependencies
+- Promise-based execution
+- Sequential task processing
+- Tiny footprint
+- Easy to extend
+
+## Example
+
+import Klynt from "./src/index.js";
+
+const queue = new Klynt();
+
+queue.add(async () => console.log("First"));
+queue.add(async () => console.log("Second"));
+
+await queue.run();
+
+Output
+
+First
+Second
+
+## Why Klynt?
+
+Most queue libraries solve every possible problem.
+Klynt focuses on doing one thing well: running asynchronous tasks in order.
+
+==================================================
+src/index.js
+==================================================
+
+export default class Klynt {
+  constructor() {
+    this.tasks = [];
+    this.running = false;
+  }
+
+  add(task) {
+    if (typeof task !== "function") {
+      throw new TypeError("Task must be a function.");
+    }
+
+    this.tasks.push(task);
+    return this;
+  }
+
+  async run() {
+    if (this.running) return;
+
+    this.running = true;
+
+    while (this.tasks.length) {
+      const task = this.tasks.shift();
+
+      try {
+        await task();
+      } catch (error) {
+        console.error("[Klynt]", error.message);
+      }
+    }
+
+    this.running = false;
+  }
+
+  clear() {
+    this.tasks.length = 0;
+    return this;
+  }
+
+  get size() {
+    return this.tasks.length;
+  }
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const queue = new Klynt();
+
+  queue
+    .add(async () => console.log("Loading assets..."))
+    .add(async () => console.log("Syncing data..."))
+    .add(async () => console.log("Done."));
+
+  queue.run();
+}
+
+==================================================
+LICENSE
+==================================================
+
+MIT License
+
+Copyright (c) 2026
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files, to deal in the Software
+without restriction, including the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software.
